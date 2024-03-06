@@ -1,10 +1,21 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"html/template"
 	"net/http"
+	"strconv"
 )
+
+var templates = template.Must(template.New("").ParseGlob("*.html"))
+
+// TODO: Read flags from env vars to keep them static
+var flag_1 = generateFlag()
+var flag_2 = generateFlag()
+var flag_3 = generateFlag()
 
 func main() {
 	http.HandleFunc("/", indexHandler)
@@ -15,16 +26,19 @@ func main() {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		flag_2 := "ABC"
-		encodedFlag := base64.StdEncoding.EncodeToString([]byte(flag_2))
+		encodedFlag := base64.StdEncoding.EncodeToString([]byte(flag_1))
 
-		htmlContent := `<html><head><meta name="Ctf" content="` + encodedFlag + `"></head><body><h1>LiveLink Hackathon 2024</h1>My granny knows lots of methods to cook the cookies. But she forgot how to make a <a href="/cookies"> special cookie</a>. Trace the one for her at this web site.</body></html>`
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(htmlContent))
+		data := map[string]string{
+			"EncodedFlag": encodedFlag,
+		}
+
+		err := templates.ExecuteTemplate(w, "index.html", data)
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+		}
 
 	case "TRACE":
-		flag_3 := "XYZ"
-		w.Header().Set("Ctf", flag_3)
+		w.Header().Set("Ctf", flag_2)
 		w.WriteHeader(http.StatusOK)
 
 	default:
@@ -33,9 +47,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func cookiesHandler(w http.ResponseWriter, r *http.Request) {
-	flag_1 := "GHI"
-
-	// Define an array with 21 elements (0th index will not be used)
 	cookieResponses := [20]string{
 		"Chocolate cookie",
 		"Apple cookie",
@@ -59,40 +70,52 @@ func cookiesHandler(w http.ResponseWriter, r *http.Request) {
 		"Blackberry cookie",
 	}
 
-	htmlStart := `<html><body><h3>Cookies</h3>`
-	htmlForm := `<form action="/cookies" method="post"><input type="text" name="name"/><input type="submit" value="Submit"/></form>`
-	htmlEnd := `</body></html>`
-
 	switch r.Method {
 	case "GET":
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(htmlStart + htmlForm + htmlEnd))
+		err := templates.ExecuteTemplate(w, "cookies.html", nil)
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+		}
 
 	case "POST":
+		message := "Not a special cookie"
+
 		if cookie, err := r.Cookie("name"); err == nil {
-			// Convert the cookie value to an integer index
+			// Convert the `name` cookie value to an integer index
 			var index int
 			fmt.Sscan(cookie.Value, &index)
 
 			// Check if the index is within the bounds of the array
 			if index >= 0 && index < len(cookieResponses) {
-				response := cookieResponses[index]
 				if index == 6 {
-					http.SetCookie(w, &http.Cookie{Name: "name", Value: flag_1, Path: "/"})
+					http.SetCookie(w, &http.Cookie{Name: "name", Value: flag_3, Path: "/"})
+					message = cookieResponses[index]
 				} else {
-					http.SetCookie(w, &http.Cookie{Name: "name", Value: cookie.Value, Path: "/"})
+					http.SetCookie(w, &http.Cookie{Name: "name", Value: strconv.Itoa(index), Path: "/"})
+					message = cookieResponses[index]
 				}
-				w.Write([]byte(htmlStart + response + htmlForm + htmlEnd))
 			} else {
 				http.SetCookie(w, &http.Cookie{Name: "name", Value: "-1", Path: "/"})
-				w.Write([]byte(htmlStart + `Not a special cookie` + htmlForm + htmlEnd))
 			}
 		} else {
 			http.SetCookie(w, &http.Cookie{Name: "name", Value: "-1", Path: "/"})
-			w.Write([]byte(htmlStart + `Not a special cookie` + htmlForm + htmlEnd))
 		}
 
+		data := map[string]string{
+			"Message": message,
+		}
+
+		err := templates.ExecuteTemplate(w, "cookies.html", data)
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+		}
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func generateFlag() string {
+	bytes := make([]byte, 16)
+	_, _ = rand.Read(bytes)
+	return "CTF_" + hex.EncodeToString(bytes)
 }
