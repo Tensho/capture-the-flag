@@ -18,7 +18,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		flag_2 := "ABC"
 		encodedFlag := base64.StdEncoding.EncodeToString([]byte(flag_2))
 
-		htmlContent := "<html><head><meta name=\"Ctf\" content=\"" + encodedFlag + "\"></head><body><h1>ABC Hackathon 2024</h1></body></html>"
+		htmlContent := `<html><head><meta name="Ctf" content="` + encodedFlag + `"></head><body><h1>LiveLink Hackathon 2024</h1>My granny knows lots of methods to cook the cookies. But she forgot how to make a <a href="/cookies"> special cookie</a>. Trace the one for her at this web site.</body></html>`
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(htmlContent))
 
@@ -59,7 +59,7 @@ func cookiesHandler(w http.ResponseWriter, r *http.Request) {
 		"Blackberry cookie",
 	}
 
-	htmlStart := `<html><body>`
+	htmlStart := `<html><body><h3>Cookies</h3>`
 	htmlForm := `<form action="/cookies" method="post"><input type="text" name="name"/><input type="submit" value="Submit"/></form>`
 	htmlEnd := `</body></html>`
 
