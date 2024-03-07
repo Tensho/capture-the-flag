@@ -40,6 +40,8 @@ resource "google_project_service" "secretmanager" {
   disable_on_destroy = false
 }
 
+# TODO: Add default service account IAM permission to read secrets
+
 resource "random_string" "flag" {
   count = 3
 
