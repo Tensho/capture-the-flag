@@ -5,6 +5,9 @@ Find out 3 flags.
 ### Prerequisites
 
     $ brew bundle
+    $ go mod init livelink/ctf
+    $ go get
+    $
 
 ## Development
 
@@ -16,5 +19,10 @@ Find out 3 flags.
 
     $ gcloud config set core/project com-livelinklabs-ctf
     $ gcloud auth login
-    $ gcloud functions deploy ctf --runtime go121 --trigger-http --allow-unauthenticated
+    $ gcloud functions deploy ctf --gen2 --runtime go121 --trigger-http --allow-unauthenticated --max-instances 1
 
+## Misc
+
+### Get available functions runtimes
+
+    $ gcloud functions runtimes list

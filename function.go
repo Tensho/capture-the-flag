@@ -1,26 +1,43 @@
-package main
+// TODO: Check 12 factors in app
+package ctf
 
 import (
 	"crypto/rand"
+	"embed"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
-var templates = template.Must(template.New("").ParseGlob("*.html"))
+//go:embed index.html cookies.html
+var content embed.FS
+
+var templates = template.Must(template.New("").ParseFS(content, "index.html", "cookies.html"))
 
 // TODO: Read flags from env vars to keep them static
 var flag_1 = generateFlag()
 var flag_2 = generateFlag()
 var flag_3 = generateFlag()
 
-func main() {
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/cookies", cookiesHandler)
-	http.ListenAndServe(":8080", nil)
+func init() {
+	functions.HTTP("ctf", EntryPoint)
+}
+
+func EntryPoint(w http.ResponseWriter, r *http.Request) {
+	// Route based on the URL path
+	switch r.URL.Path {
+	case "/":
+		indexHandler(w, r)
+	case "/cookies":
+		cookiesHandler(w, r)
+	default:
+		http.NotFound(w, r)
+	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +54,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Server error", http.StatusInternalServerError)
 		}
 
-	case "TRACE":
+	case "HEAD":
 		w.Header().Set("Ctf", flag_2)
 		w.WriteHeader(http.StatusOK)
 
