@@ -7,7 +7,7 @@ Find out 3 flags.
     $ brew bundle
     $ go mod init livelink/ctf
     $ go get
-    $
+    $ go build
 
 ## Development
 
@@ -19,7 +19,12 @@ Find out 3 flags.
 
     $ gcloud config set core/project com-livelinklabs-ctf
     $ gcloud auth login
-    $ gcloud functions deploy ctf --gen2 --runtime go121 --trigger-http --allow-unauthenticated --max-instances 1
+    $ gcloud functions deploy ctf --gen2 \
+                                  --runtime go121 \
+                                  --trigger-http \
+                                  --allow-unauthenticated \ 
+                                  --max-instances 1 \
+                                  --set-secrets=FLAG_1=projects/765124037022/secrets/FLAG_1/versions/1,FLAG_2=projects/765124037022/secrets/FLAG_2/versions/1,FLAG_3=projects/765124037022/secrets/FLAG_3/versions/1
 
 ## Misc
 

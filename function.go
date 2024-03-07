@@ -2,13 +2,12 @@
 package ctf
 
 import (
-	"crypto/rand"
 	"embed"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
@@ -19,10 +18,9 @@ var content embed.FS
 
 var templates = template.Must(template.New("").ParseFS(content, "index.html", "cookies.html"))
 
-// TODO: Read flags from env vars to keep them static
-var flag_1 = generateFlag()
-var flag_2 = generateFlag()
-var flag_3 = generateFlag()
+var flag_1 = os.Getenv("FLAG_1")
+var flag_2 = os.Getenv("FLAG_2")
+var flag_3 = os.Getenv("FLAG_3")
 
 func init() {
 	functions.HTTP("ctf", EntryPoint)
@@ -129,10 +127,4 @@ func cookiesHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-}
-
-func generateFlag() string {
-	bytes := make([]byte, 16)
-	_, _ = rand.Read(bytes)
-	return "CTF_" + hex.EncodeToString(bytes)
 }
