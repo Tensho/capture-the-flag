@@ -2,17 +2,25 @@
 
 Find out 3 flags.
 
+https://europe-west2-com-livelinklabs-ctf.cloudfunctions.net/ctf
+
 ### Prerequisites
 
     $ brew bundle
-    $ go mod init livelink/ctf
-    $ go get
-    $ go build
 
 ## Development
 
+### Infrastructure
+
+    $ cd terraform
+    $ terraform apply
+
+### Application
+
+    $ go mod init livelink/ctf
+    $ go get
     $ go build
-    $ ./main
+    $ ./main &
     $ curl -I http://localhost:8080
 
 ## Deployment (GCP)
